@@ -1,0 +1,135 @@
+
+        <style>
+          /* Make the table take up the full width of the screen and make it scrollable */
+          .records_table {
+            width: 100%;
+            overflow: auto;
+            display: block;
+          }
+
+          /* Make the first column sticky */
+          .records_table th:first-child,
+          .records_table td:first-child {
+            position: sticky;
+            left: 0;
+            background: white;
+          }
+        </style>
+        <script
+          type="text/javascript"
+          src="https://www.gstatic.com/charts/loader.js"
+        ></script>
+        <script type="text/javascript">
+          google.charts.load('current', {'packages':['line']});
+          google.charts.setOnLoadCallback(() => {
+            for (let fingerNumber = 1; fingerNumber <= 6; fingerNumber++) {
+              drawChart(fingerNumber);
+            }
+          });
+
+          async function drawChart(fingerNumber) {
+            const response = await fetch(`/latestData/${fingerNumber}`);
+            const serverData = await response.json();
+
+            var data = new google.visualization.DataTable();
+            data.addColumn('number', 'Reading Number');
+            for (let i = 0; i < 5; i++) {
+              data.addColumn('number', `Record ${i + 1}`);
+            }
+
+            // Convert serverData into a format suitable for Google Charts
+            const chartData = serverData[0].readings.map((_, index) => [
+              index + 1, // Reading Number
+              ...serverData.slice(0, 5).map(record => parseFloat(record.readings[index].readingValue))
+            ]);
+
+            data.addRows(chartData);
+
+            var options = {
+              chart: {
+                title: `Latest Five Records for Finger ${fingerNumber}`,
+                subtitle: 'in millions of dollars (USD)'
+              },
+              width: 900,
+              height: 500,
+              axes: {
+                x: {
+                  0: {side: 'bottom'}
+                }
+              }
+            };
+
+            var chart = new google.charts.Line(document.getElementById(`line_top_x_${fingerNumber}`));
+
+            chart.draw(data, google.charts.Line.convertOptions(options));
+
+            // Add the records to the table
+            const table = document.getElementById(`records_table_${fingerNumber}`);
+            const tableHead = table.getElementsByTagName('thead')[0];
+            const tableBody = table.getElementsByTagName('tbody')[0];
+
+            // Add the reading number headers
+            const headerRow = tableHead.getElementsByTagName('tr')[0];
+            serverData[0].readings.forEach((_, index) => {
+              const th = document.createElement('th');
+              th.textContent = `Reading ${index + 1}`;
+              headerRow.appendChild(th);
+            });
+
+            // Add the record rows
+            serverData.slice(0, 5).forEach((record, recordIndex) => {
+              const row = tableBody.insertRow();
+
+              const cell1 = row.insertCell(0);
+              cell1.textContent = `Record ${recordIndex + 1}`;
+
+              record.readings.forEach((reading) => {
+                const cell = row.insertCell();
+                cell.textContent = reading.readingValue;
+                });
+              });
+
+            }
+        </script>
+      </head>
+      <body>
+        <div id="line_top_x_1"></div>
+        <table id="records_table_1" class="records_table" border="1">
+          <thead>
+            <tr>
+              <th>Record / Reading</th>
+              <!-- Reading number headers will be added here by JavaScript -->
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be added here by JavaScript -->
+          </tbody>
+        </table>
+
+        <div id="line_top_x_2"></div>
+        <table id="records_table_2" class="records_table" border="1">
+          <thead>
+            <tr>
+              <th>Record / Reading</th>
+              <!-- Reading number headers will be added here by JavaScript -->
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be added here by JavaScript -->
+          </tbody>
+        </table>
+
+        <!-- Repeat for each finger -->
+
+        <div id="line_top_x_6"></div>
+        <table id="records_table_6" class="records_table" border="1">
+          <thead>
+            <tr>
+              <th>Record / Reading</th>
+              <!-- Reading number headers will be added here by JavaScript -->
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be added here by JavaScript -->
+          </tbody>
+        </table>

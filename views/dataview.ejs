@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: auto;
+      }
+
+      .records_table {
+        width: 100%;
+        overflow: auto;
+        display: block;
+        border: 1px solid black;
+        border-collapse: collapse;
+      }
+
+      .records_table::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .records_table::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 5px;
+      }
+
+      .records_table::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      .records_table th:first-child,
+      .records_table td:first-child {
+        position: sticky;
+        left: 0;
+        background: white;
+      }
+
+      .records_table th,
+      .records_table td {
+        border: 1px solid black;
+      }
+
+      .chart-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+    </style>
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+    <script type="text/javascript">
+      google.charts.load("current", { packages: ["line"] });
+      google.charts.setOnLoadCallback(drawChart);
+
+      async function drawChart() {
+        for (let i = 1; i <= 6; i++) {
+          const response = await fetch(`/latestData/${i}`);
+          const serverData = await response.json();
+          console.log(serverData);
+
+          var data = new google.visualization.DataTable();
+          data.addColumn("number", "Reading Number");
+          serverData.slice(0, 5).forEach((record, recordIndex) => {
+            data.addColumn(
+              "number",
+              new Date(record.currentDateTime).toLocaleString()
+            );
+          });
+
+          const chartData = serverData[0].readings.map((_, index) => [
+            index + 1,
+            ...serverData
+              .slice(0, 5)
+              .map((record) => parseFloat(record.readings[index].readingValue)),
+          ]);
+
+          data.addRows(chartData);
+
+          var options = {
+            chart: {
+              title:
+                i === 6
+                  ? "Latest Five Records for Wrist"
+                  : `Latest Five Records for Finger ${i}`,
+              subtitle: "",
+            },
+            width: 900,
+            height: 500,
+            axes: {
+              x: {
+                0: { side: "bottom" },
+              },
+            },
+          };
+
+          var chart = new google.charts.Line(
+            document.getElementById(`line_top_x_${i}`)
+          );
+          chart.draw(data, google.charts.Line.convertOptions(options));
+
+          const table = document.getElementById(`records_table_${i}`);
+          const tableHead = table.getElementsByTagName("thead")[0];
+          const tableBody = table.getElementsByTagName("tbody")[0];
+
+          const headerRow = tableHead.getElementsByTagName("tr")[0];
+          serverData[0].readings.forEach((_, index) => {
+            const th = document.createElement("th");
+            th.textContent = `Reading ${index + 1}`;
+            headerRow.appendChild(th);
+          });
+
+          serverData.slice(0, 5).forEach((record, recordIndex) => {
+            const row = tableBody.insertRow();
+
+            const cell1 = row.insertCell(0);
+            cell1.textContent = new Date(
+              record.currentDateTime
+            ).toLocaleString(); // Use the record's date time
+
+            record.readings.forEach((reading) => {
+              const cell = row.insertCell();
+              cell.textContent = reading.readingValue;
+            });
+          });
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="chart-container">
+        <div id="line_top_x_1"></div>
+      </div>
+      <br /><br />
+      <table id="records_table_1" class="records_table" border="1">
+        <thead>
+          <tr>
+            <th>Record / Reading</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <br /><br />
+      <hr />
+      <br /><br />
+
+      <div class="chart-container">
+        <div id="line_top_x_2"></div>
+      </div>
+      <br /><br />
+      <table id="records_table_2" class="records_table" border="1">
+        <thead>
+          <tr>
+            <th>Record / Reading</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <br /><br />
+      <hr />
+      <br /><br />
+
+      <div class="chart-container">
+        <div id="line_top_x_3"></div>
+      </div>
+      <br /><br />
+      <table id="records_table_3" class="records_table" border="1">
+        <thead>
+          <tr>
+            <th>Record / Reading</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <br /><br />
+      <hr />
+      <br /><br />
+
+      <div class="chart-container">
+        <div id="line_top_x_4"></div>
+      </div>
+      <br /><br />
+      <table id="records_table_4" class="records_table" border="1">
+        <thead>
+          <tr>
+            <th>Record / Reading</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <br /><br />
+      <hr />
+      <br /><br />
+
+      <div class="chart-container">
+        <div id="line_top_x_5"></div>
+      </div>
+      <br /><br />
+      <table id="records_table_5" class="records_table" border="1">
+        <thead>
+          <tr>
+            <th>Record / Reading</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <br /><br />
+      <hr />
+      <br /><br />
+
+      <div class="chart-container">
+        <div id="line_top_x_6"></div>
+      </div>
+      <br /><br />
+      <table id="records_table_6" class="records_table" border="1">
+        <thead>
+          <tr>
+            <th>Record / Reading</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </body>
+</html>
