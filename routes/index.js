@@ -16,6 +16,7 @@ router.get("/dataview", (req, res, next) => {
   res.render("dataview");
 });
 
+//pass datato mongoDB
 router.post("/insert/:fingerNumber", (req, res, next) => {
   console.log(req.body);
   const fingerNumber = req.params.fingerNumber; // Get the fingerNumber from the path
